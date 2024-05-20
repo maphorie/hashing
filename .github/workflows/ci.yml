@@ -1,0 +1,43 @@
+name: ci
+
+on:
+  - push
+  - pull_request
+
+env:
+  BUILD_TYPE: Release
+
+jobs:
+  build:
+    runs-on: ${{ matrix.os }}
+
+    strategy:
+      fail-fast: false
+
+      matrix:
+        os:
+          - macos-latest
+          - ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install dependencies (Homebrew)
+        if: matrix.os == 'macos-latest'
+        run: |
+          brew install boost
+
+      - name: Install dependencies (APT)
+        if: matrix.os == 'ubuntu-latest'
+        run: |
+          sudo apt-get -y install --no-install-recommends libboost-program-options-dev libboost-test-dev
+
+      - name: Configure CMake
+        run: cmake -B ${{ github.workspace }}/build -DCMAKE_BUILD_TYPE=${{ env.BUILD_TYPE }}
+
+      - name: Build
+        run: cmake --build ${{ github.workspace }}/build --config ${{ env.BUILD_TYPE }}
+
+      - name: Test
+        working-directory: ${{ github.workspace }}/build
+        run: ctest -C ${{ env.BUILD_TYPE }}
