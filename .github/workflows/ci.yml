@@ -10,6 +10,10 @@ permissions:
 env:
   BUILD_TYPE: Release
 
+defaults:
+  run:
+    shell: bash
+
 jobs:
   build:
     runs-on: ${{ matrix.os }}
@@ -44,3 +48,5 @@ jobs:
       - name: Test
         working-directory: ${{ github.workspace }}/build
         run: ctest -C ${{ env.BUILD_TYPE }}
+
+    timeout-minutes: 5
